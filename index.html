@@ -126,6 +126,20 @@
             margin-top: 5px;
             font-size: 12px;
         }
+
+       /* 新增提示样式 */
+       .input-tip {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 1000;
+            display: none;
+        }
     </style>
 </head>
 
@@ -141,20 +155,35 @@
         <div class="chat-input">
             <input type="text" id="userInput" placeholder="请输入你的消息">
             <button id="sendButton" onclick="sendMessage()">发送</button>
-            <span class="plus-icon" onclick="openImageSelector()">&#43;</span>
+            <span class="plus-icon" id="plusIcon">&#43;</span>
             <input type="file" id="imageInput" accept="image/jpeg,image/png,image/gif" style="display: none;">
         </div>
         <div class="loading-tip" id="loadingTip">AI 正在回复...</div>
         <div id="imagePreviewContainer"></div>
         <div id="errorTip"></div>
+        <!-- 新增提示元素 -->
+        <div class="input-tip" id="inputTip">请输入文本后发送</div>
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('plusIcon').addEventListener('click', openImageSelector);
+        });
+
         function sendMessage() {
             const userInput = document.getElementById('userInput').value;
             if (userInput === "") {
+                const inputTip = document.getElementById('inputTip');
+                inputTip.style.display = 'block';
+                // 延迟3秒隐藏提示框
+                setTimeout(() => {
+                    inputTip.style.display = 'none';
+                }, 3000);
                 return;
             }
+
+            // 在处理发送逻辑前，先清空编辑框
+            document.getElementById('userInput').value = '';
 
             const sendButton = document.getElementById('sendButton');
             sendButton.classList.add('disabled-button');
