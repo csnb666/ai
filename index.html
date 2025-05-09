@@ -4,8 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>赖哥 AI 聊天
-           云链技术部安全保障</title>
+    <title>赖哥 AI 聊天 云链技术部安全保障</title>
     <style>
         /* 全局样式重置 */
         * {
@@ -85,6 +84,7 @@
             border-radius: 50%;
             cursor: pointer;
             margin-left: 8px;
+            position: relative;
         }
 
        .plus-icon {
@@ -102,29 +102,18 @@
             cursor: not-allowed;
         }
 
-       .loading-tip {
-            position: fixed;
+       .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 1000;
-            display: none;
-        }
-
-       .loading-tip::after {
-            content: "";
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-left: 5px;
+            display: none;
         }
 
         @keyframes spin {
@@ -196,8 +185,6 @@
                 <button id="confirmButton" onclick="confirmImageSelection()">确定</button>
             </div>
         </div>
-        <div class="loading-tip" id="loadingTip">AI 正在回复中...</div>
-        <div id="imagePreviewContainer"></div>
         <div id="errorTip"></div>
         <!-- 新增提示元素 -->
         <div class="input-tip" id="inputTip">请输入文本后发送</div>
@@ -224,11 +211,12 @@
             document.getElementById('userInput').value = '';
 
             const sendButton = document.getElementById('sendButton');
-            sendButton.classList.add('disabled-button');
+            const spinner = document.createElement('div');
+            spinner.classList.add('loading-spinner');
+            sendButton.innerHTML = '';
+            sendButton.appendChild(spinner);
             sendButton.disabled = true;
-
-            const loadingTip = document.getElementById('loadingTip');
-            loadingTip.style.display = 'block';
+            spinner.style.display = 'block';
 
             const chatMessages = document.getElementById('chatMessages');
             const userMessageElement = document.createElement('div');
@@ -265,23 +253,26 @@
                .then(data => {
                     const aiMessageElement = document.createElement('div');
                     aiMessageElement.classList.add('message', 'ai-message');
-                    aiMessageElement.textContent = `AI: ${data.choices[0].message.content}`;
+                    aiMessageElement.textContent = ` ${data.choices[0].message.content}`;
                     chatMessages.appendChild(aiMessageElement);
                     chatMessages.scrollTop = chatMessages.scrollHeight;
-                    sendButton.classList.remove('disabled-button');
+
+                    const sendButton = document.getElementById('sendButton');
+                    sendButton.innerHTML = '↑';
                     sendButton.disabled = false;
-                    loadingTip.style.display = 'none';
                 })
                .catch(error => {
                     console.error('Error:', error);
+                    const chatMessages = document.getElementById('chatMessages');
                     const errorMessage = document.createElement('div');
                     errorMessage.classList.add('message', 'ai-message');
-                    errorMessage.textContent = `AI: 请求出错: ${error.message}`;
+                    errorMessage.textContent = `请求出错: ${error.message}`;
                     chatMessages.appendChild(errorMessage);
                     chatMessages.scrollTop = chatMessages.scrollHeight;
-                    sendButton.classList.remove('disabled-button');
+
+                    const sendButton = document.getElementById('sendButton');
+                    sendButton.innerHTML = '↑';
                     sendButton.disabled = false;
-                    loadingTip.style.display = 'none';
                 });
         }
 
@@ -340,10 +331,12 @@
                 const apiUrl = "https://api.deepseek.com/your-image-analysis-endpoint";
                 const apiKey = "sk-9f035d4380d242e38c7c8d61f012287d";
                 const sendButton = document.getElementById('sendButton');
-                sendButton.classList.add('disabled-button');
+                const spinner = document.createElement('div');
+                spinner.classList.add('loading-spinner');
+                sendButton.innerHTML = '';
+                sendButton.appendChild(spinner);
                 sendButton.disabled = true;
-                const loadingTip = document.getElementById('loadingTip');
-                loadingTip.style.display = 'block';
+                spinner.style.display = 'block';
 
                 fetch(apiUrl, {
                     method: 'POST',
@@ -365,21 +358,23 @@
                     aiMessageElement.textContent = `AI: ${data.analysis_result}`;
                     chatMessages.appendChild(aiMessageElement);
                     chatMessages.scrollTop = chatMessages.scrollHeight;
-                    sendButton.classList.remove('disabled-button');
+
+                    const sendButton = document.getElementById('sendButton');
+                    sendButton.innerHTML = '↑';
                     sendButton.disabled = false;
-                    loadingTip.style.display = 'none';
                 })
                .catch(error => {
                     console.error('Error:', error);
                     const chatMessages = document.getElementById('chatMessages');
                     const errorMessage = document.createElement('div');
                     errorMessage.classList.add('message', 'ai-message');
-                    errorMessage.textContent = `AI: 请求出错: ${error.message}`;
+                    errorMessage.textContent = ` 请求出错: ${error.message}`;
                     chatMessages.appendChild(errorMessage);
                     chatMessages.scrollTop = chatMessages.scrollHeight;
-                    sendButton.classList.remove('disabled-button');
+
+                    const sendButton = document.getElementById('sendButton');
+                    sendButton.innerHTML = '↑';
                     sendButton.disabled = false;
-                    loadingTip.style.display = 'none';
                 });
             };
             reader.readAsDataURL(file);
