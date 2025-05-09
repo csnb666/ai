@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>赖哥 AI 聊天 云链技术部安全保障</title>
+    <title>赖哥AI 2.0全新升级</title>
     <style>
         /* 全局样式重置 */
         * {
@@ -23,10 +23,36 @@
 
         /* 聊天头部 */
        .chat-header {
-            background-color: #007bff;
-            color: white;
-            text-align: center;
-            padding: 15px;
+            background-color: #fff;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        /* 右上角菜单 */
+       .header-menu {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+        }
+
+        /* 菜单选项 */
+       .menu-option {
+            display: none;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+       .menu-option a {
+            text-decoration: none;
+            color: #333;
+            padding: 5px 10px;
+            display: block;
         }
 
         /* 聊天消息区域 */
@@ -73,7 +99,7 @@
             border: 1px solid #ccc;
             outline: none;
             font-size: 14px;
-            border-radius: 4px;
+            border-radius: 100px; /* 修改了这里的圆角大小 */
         }
 
        .chat-input button {
@@ -127,6 +153,7 @@
             max-height: 200px;
             margin-top: 5px;
             border-radius: 5px;
+            display: block;
         }
 
        .error-tip {
@@ -159,6 +186,32 @@
             border-radius: 5px;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
+
+        /* 朗读按钮样式 */
+       .read-aloud-button {
+            display: none;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        /* 清除成功提示样式 */
+       .clear-success-tip {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 1000;
+            display: none;
+        }
     </style>
 </head>
 
@@ -166,7 +219,13 @@
     <div class="chat-container">
         <!-- 聊天头部 -->
         <div class="chat-header">
-            <h2>赖哥 AI 聊天（云链技术部安全保障）</h2>
+            <h2>赖哥AI 2.0全新升级</h2>
+            <div class="header-menu">
+                <span id="menuTrigger">...</span>
+                <div class="menu-option" id="menuOptions">
+                    <a href="#" id="clearChat">清除聊天记录</a>
+                </div>
+            </div>
         </div>
         <!-- 聊天消息区域 -->
         <div class="chat-messages" id="chatMessages"></div>
@@ -188,11 +247,43 @@
         <div id="errorTip"></div>
         <!-- 新增提示元素 -->
         <div class="input-tip" id="inputTip">请输入文本后发送</div>
+        <!-- 清除成功提示元素 -->
+        <div class="clear-success-tip" id="clearSuccessTip">清除成功</div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('plusIcon').addEventListener('click', openImageSelector);
+            document.getElementById('menuTrigger').addEventListener('click', function () {
+                const menuOptions = document.getElementById('menuOptions');
+                menuOptions.style.display = menuOptions.style.display === 'none'? 'block' : 'none';
+            });
+            document.getElementById('clearChat').addEventListener('click', clearChatHistory);
+
+            document.addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+            });
+
+            document.addEventListener('longpress', function (e) {
+                if (e.target.classList.contains('ai-message')) {
+                    const messageText = e.target.textContent;
+                    const readAloudButton = document.createElement('button');
+                    readAloudButton.textContent = '朗读';
+                    readAloudButton.classList.add('read-aloud-button');
+                    readAloudButton.onclick = function () {
+                        const utterance = new SpeechSynthesisUtterance(messageText);
+                        speechSynthesis.speak(utterance);
+                    };
+                    e.target.appendChild(readAloudButton);
+                }
+            });
+
+            document.addEventListener('click', function (e) {
+                const menuOptions = document.getElementById('menuOptions');
+                if (menuOptions.style.display === 'block' &&!menuOptions.contains(e.target) &&!document.getElementById('menuTrigger').contains(e.target)) {
+                    menuOptions.style.display = 'none';
+                }
+            });
         });
 
         function sendMessage() {
@@ -380,7 +471,19 @@
             reader.readAsDataURL(file);
         }
 
-        document.getElementById('imageInput').addEventListener('change', sendImage);
+        function clearChatHistory() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+
+            const clearSuccessTip = document.getElementById('clearSuccessTip');
+            clearSuccessTip.style.display = 'block';
+
+            // 这里清除成功后不进行按钮禁用或隐藏操作，保持可再次点击清除的状态
+            // 延迟2秒隐藏提示框
+            setTimeout(() => {
+                clearSuccessTip.style.display = 'none';
+            }, 2000);
+        }
     </script>
 </body>
 
