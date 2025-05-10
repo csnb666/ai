@@ -2,114 +2,90 @@
 <html lang="zh-CN">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>刷脸系统</title>
-  <style>
-    /* 整体样式 */
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>赖哥AI登录界面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
 
-    /* 摄像头显示区域样式 */
-    #camera {
-      width: 300px;
-      height: 300px;
-      margin: 50px auto;
-      border: 1px solid #ccc;
-    }
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px; /* 设置表单宽度，固定整体UI宽度 */
+        }
 
-    /* 按钮样式 */
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
 
-    /* 提示框样式 */
-    #prompt {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: white;
-      border: 1px solid #ccc;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            box-sizing: border-box; /* 使内边距和边框不影响宽度 */
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
 
-    /* 输入框样式 */
-    input {
-      margin-bottom: 10px;
-      padding: 5px;
-    }
-  </style>
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box; /* 使内边距和边框不影响宽度 */
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 
 <body>
-  <div id="text-container">
-    <p>点击下方按钮刷脸认证</p>
-  </div>
-  <div id="camera"></div>
-  <button id="startButton">开始刷脸</button>
-  <div id="prompt">
-    <p>刷脸成功，请填写姓名：</p>
-    <input type="text" id="nameInput">
-    <button id="confirmButton">确定</button>
-  </div>
+    <form>
+        <label for="name">姓名：</label>
+        <input type="text" id="name" required>
+        <label for="idCard">身份证号码：</label>
+        <input type="text" id="idCard" required>
+        <button onclick="checkAndRedirect()">登录</button>
+    </form>
 
-  <script>
-    const startButton = document.getElementById('startButton');
-    const prompt = document.getElementById('prompt');
-    const confirmButton = document.getElementById('confirmButton');
-    const nameInput = document.getElementById('nameInput');
-    const camera = document.getElementById('camera');
+    <script>
+        function checkAndRedirect() {
+            const name = document.getElementById('name').value;
+            const idCard = document.getElementById('idCard').value;
 
-    startButton.addEventListener('click', function () {
-      // 调用摄像头
-      navigator.mediaDevices.getUserMedia({ video: true })
-       .then(function (stream) {
-          const video = document.createElement('video');
-          video.width = 300;
-          video.height = 300;
-          video.srcObject = stream;
-          video.play();
-          camera.appendChild(video);
+            // 简单的姓名非空判断，实际可根据需求加强验证
+            if (name === "") {
+                alert("姓名不能为空");
+                return;
+            }
 
-          // 模拟2秒后刷脸成功
-          setTimeout(function () {
-            stream.getTracks().forEach(function (track) {
-              track.stop();
-            });
-            video.remove();
-            prompt.style.display = 'block';
-          }, 2000);
-        })
-       .catch(function (error) {
-          console.log('无法访问摄像头', error);
-        });
-    });
+            // 身份证号码的简单格式验证，实际可根据身份证编码规则进行更精确验证
+            const idCardRegex = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+            if (!idCard.match(idCardRegex)) {
+                alert("身份证号码格式不正确");
+                return;
+            }
 
-    confirmButton.addEventListener('click', function () {
-      const name = nameInput.value;
-      if (name === "") {
-        alert("姓名不能为空");
-      } else if (/^[0-9]+$/.test(name)) {
-        alert("姓名不能为数字");
-      } else {
-        // 这里可以添加将姓名发送到服务器等操作
-        console.log('填写的姓名:', name);
-        // 模拟跳转到index.html
-        window.location.href = 'index.html';
-      }
-    });
-  </script>
+            // 验证通过，跳转到index.html
+            window.location.href = 'index.html';
+        }
+    </script>
 </body>
 
 </html>
