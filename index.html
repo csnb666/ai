@@ -4,498 +4,478 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>赖哥AI 2.5满血版</title>
+    <title>Cardellseek满血版3.0</title>
     <style>
-        /* 全局样式重置 */
+        /* 基础样式（可根据需求自定义） */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f8f9fa;
+            background-color: #f0f2f5;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        /* 聊天头部 */
-       .chat-header {
-            background-color: #fff;
-            border-bottom: 1px solid #ccc;
+        .chat-header {
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            padding: 10px;
         }
 
-        /* 右上角菜单 */
-       .header-menu {
-            position: absolute;
-            right: 20px;
-            top: 10px;
+        .chat-header h2 {
+            margin: 0;
         }
 
-        /* 菜单选项 */
-       .menu-option {
+        .header-menu {
+            cursor: pointer;
+        }
+
+        .menu-content {
             display: none;
+            position: absolute;
+            right: 1rem;
+            top: 3rem;
             background-color: white;
-            border: 1px solid #ccc;
+            border: 1px solid #e0e0e0;
             border-radius: 5px;
-            padding: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem;
         }
 
-       .menu-option a {
+        .menu-content a {
+            display: block;
+            padding: 0.5rem 1rem;
             text-decoration: none;
             color: #333;
-            padding: 5px 10px;
-            display: block;
+            transition: background-color 0.2s;
         }
 
-        /* 聊天消息区域 */
-       .chat-messages {
+        .menu-content a:hover {
+            background-color: #f0f2f5;
+        }
+
+        .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 15px;
-        }
-
-       .message {
-            margin-bottom: 10px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            max-width: 75%;
-        }
-
-       .user-message {
-            background-color: #e1f5fe;
-            align-self: flex-end;
-            float: right;
-        }
-
-       .ai-message {
-            background-color: #f0f2f5;
-            align-self: flex-start;
-            float: left;
-        }
-
-        /* 聊天输入区域 */
-       .chat-input {
+            padding: 1rem;
             display: flex;
-            align-items: center;
-            background-color: white;
-            padding: 10px;
-            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-            position: fixed;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 0.8rem 1.2rem;
+            border-radius: 15px;
+            line-height: 1.5;
+        }
+
+        .user-message {
+            background: #e8f4ff;
+            align-self: flex-end;
+        }
+
+        .ai-message {
+            background: white;
+            align-self: flex-start;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .chat-input {
+            background: white;
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+            position: sticky;
             bottom: 0;
-            width: 100%;
         }
 
-       .chat-input input {
+        #user-input {
             flex: 1;
-            padding: 8px;
-            border: 1px solid #ccc;
+            padding: 0.8rem 1.2rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
             outline: none;
-            font-size: 14px;
-            border-radius: 100px; /* 修改了这里的圆角大小 */
         }
 
-       .chat-input button {
-            padding: 8px;
-            background-color: #007bff;
+        #send-btn {
+            padding: 0.8rem 1.5rem;
+            background: #4a90e2;
             color: white;
             border: none;
-            border-radius: 50%;
+            border-radius: 20px;
             cursor: pointer;
-            margin-left: 8px;
-            position: relative;
+            pointer-events: auto;
+            opacity: 1;
         }
 
-       .plus-icon {
-            margin-left: 8px;
-            cursor: pointer;
-            font-size: 35px;
-            background-color: white;
-            color: black;
-            padding: 8px;
-            border-radius: 50%;
-        }
-
-       .disabled-button {
-            background-color: #ccc;
+        #send-btn.disabled {
+            background: #ccc;
             cursor: not-allowed;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        /* 提示框样式 */
+       .prompt-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1rem;
+            border-radius: 5px;
+            z-index: 1000;
+            display: none;
+        }
+
+        /* 加载动画样式 */
+       .loading-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
         }
 
        .loading-spinner {
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
+            border: 3px solid #e0e0e0;
+            border-top-color: #4a90e2;
             border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation: spin 1s linear infinite;
-            display: none;
+            animation: loading-spin 1s linear infinite;
         }
 
-        @keyframes spin {
-            to {
+        @keyframes loading-spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
                 transform: rotate(360deg);
             }
         }
 
-       .image-preview {
-            max-width: 200px;
-            max-height: 200px;
-            margin-top: 5px;
-            border-radius: 5px;
-            display: block;
+       .loading-text {
+            color: #777;
         }
 
-       .error-tip {
-            color: red;
-            margin-top: 5px;
-            font-size: 12px;
-        }
-
-        /* 新增提示样式 */
-       .input-tip {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 1000;
+        /* 导出按钮样式 */
+       .export-btn-container {
             display: none;
+            justify-content: flex-end;
+            margin-top: -10px;
         }
 
-        /* 新增的选项框样式 */
-       #imageOptions {
-            position: fixed;
-            bottom: 60px;
-            background-color: white;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        }
-
-        /* 朗读按钮样式 */
-       .read-aloud-button {
-            display: none;
-            background-color: #007bff;
+       .export-btn {
+            background-color: #4a90e2;
             color: white;
             border: none;
-            padding: 5px 10px;
-            border-radius: 3px;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
             cursor: pointer;
-            margin-top: 5px;
         }
 
-        /* 清除成功提示样式 */
-       .clear-success-tip {
+        /* 举报相关样式 */
+       .report-popup {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px 20px;
+            background-color: white;
+            border: 1px solid #e0e0e0;
             border-radius: 5px;
-            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            z-index: 1001;
+            display: none;
+        }
+
+       .report-popup textarea {
+            width: 100%;
+            height: 100px;
+            resize: none;
+            margin-bottom: 10px;
+        }
+
+       .report-popup .counter {
+            display: block;
+            text-align: right;
+            color: #777;
+        }
+
+       .report-popup button {
+            margin-right: 10px;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+       .report-popup .cancel-btn {
+            background-color: #ccc;
+        }
+
+       .report-popup .confirm-btn {
+            background-color: #4a90e2;
+            color: white;
+        }
+
+       .report-success {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 1rem;
+            border-radius: 5px;
+            z-index: 1002;
             display: none;
         }
     </style>
 </head>
-
 <body>
-    <div class="chat-container">
-        <!-- 聊天头部 -->
-        <div class="chat-header">
-            <h2>赖哥AI满血版(2.5)</h2>
-            <div class="header-menu">
-                <span id="menuTrigger">...</span>
-                <div class="menu-option" id="menuOptions">
-                    <a href="#" id="clearChat">清除聊天记录🔴</a>
-                    <a href="#" id="clearChat1">清除AI记忆🔵</a>
-                    <a href="#" id="clearChat2">深度思考(开)®️</a>
-                    <a href="#" id="clearChat3">深度思考(关)®️</a>
-                    <a href="#" id="clearChat4">联网搜索(开)📶</a>
-                    <a href="#" id="clearChat5">联网搜索(关)📶</a>
-                    <a href="#" id="clearChat6">全球局域网查找(开)🌐</a>
-                    <a href="#" id="clearChat7">全球局域网查找(关)🌐</a>
-                    <a href="#" id="clearChat8">低延迟AI网络线路一🔰(使用)</a>
-                    <a href="#" id="clearChat9">低延迟AI网络线路二🔰(使用)</a>
-                    <a href="#" id="clearChat10">低延迟AI网络线路三🔰(使用)</a>
-                    <a href="#" id="clearChat11">云练技术部专业网络线路🔰(使用)</a>
-               
-                </div>
-            </div>
+    <div class="chat-header">
+        <h2>Cardellseek满血版3.0</h2>
+        <div class="header-menu">...</div>
+        <div class="menu-content" id="menuContent">
+            <a href="#" id="clearChat">清除聊天记录🚮</a>
+            <a href="#" id="deepThinkOn">深度思考®️（开）</a>
+            <a href="#" id="deepThinkOff">深度思考®️（关）</a>
+            <a href="#" id="globeSearchOn">全球局域网查找🌐（开）</a>
+            <a href="#" id="globeSearchOff">全球局域网查找🌐（关）</a>
+            <a href="#" id="reportOption">举报⚠️</a>
         </div>
-        <!-- 聊天消息区域 -->
-        <div class="chat-messages" id="chatMessages"></div>
-        <!-- 聊天输入区域 -->
-        <div class="chat-input">
-            <input type="text" id="userInput" placeholder="请输入你的消息">
-            <button id="sendButton" onclick="sendMessage()">↑</button>
-            <span class="plus-icon" id="plusIcon">⊕</span>
-            <input type="file" id="imageInput" accept="image/jpeg,image/png,image/gif" style="display: none;">
-            <!-- 新增的复选框和确定按钮 -->
-            <div id="imageOptions" style="display: none;">
-                <input type="checkbox" id="cameraOption">
-                <label for="cameraOption">拍摄</label>
-                <input type="checkbox" id="galleryOption">
-                <label for="galleryOption">相册</label>
-                <button id="confirmButton" onclick="confirmImageSelection()">确定</button>
-            </div>
-        </div>
-        <div id="errorTip"></div>
-        <!-- 新增提示元素 -->
-        <div class="input-tip" id="inputTip">请输入文本后发送</div>
-        <!-- 清除成功提示元素 -->
     </div>
+    <div class="chat-messages" id="messagesContainer"></div>
+    <div class="chat-input">
+        <input type="text" id="user-input" placeholder="请输入消息">
+        <button id="send-btn" class="disabled" onclick="sendMessage()">发送(sending)</button>
+    </div>
+    <!-- 提示框 -->
+    <div class="prompt-box" id="promptBox">成功</div>
+    <div class="report-popup" id="reportPopup">
+        <textarea id="reportReason" maxlength="200"></textarea>
+        <span class="counter">0/200</span>
+        <button class="cancel-btn" onclick="closeReportPopup()">取消</button>
+        <button class="confirm-btn" onclick="submitReport()">举报</button>
+    </div>
+    <div class="report-success" id="reportSuccess">举报已提交成功(Report submitted successfully)</div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('plusIcon').addEventListener('click', openImageSelector);
-            document.getElementById('menuTrigger').addEventListener('click', function () {
-                const menuOptions = document.getElementById('menuOptions');
-                menuOptions.style.display = menuOptions.style.display === 'none'? 'block' : 'none';
-            });
-            document.getElementById('clearChat').addEventListener('click', clearChatHistory);
+        const API_URL = "https://api.deepseek.com/v1/chat/completions";
+        const API_KEY = "sk-9f035d4380d242e38c7c8d61f012287d"; // 请替换为你的真实API Key
+        const messagesContainer = document.getElementById('messagesContainer');
+        const menuContent = document.getElementById('menuContent');
+        const headerMenu = document.querySelector('.header-menu');
+        const promptBox = document.getElementById('promptBox');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-btn');
+        const reportPopup = document.getElementById('reportPopup');
+        const reportReason = document.getElementById('reportReason');
+        const counter = document.querySelector('.counter');
+        const reportSuccess = document.getElementById('reportSuccess');
 
-            document.addEventListener('contextmenu', function (e) {
-                e.preventDefault();
-            });
+        // 初始化按钮状态
+        updateButtonState();
 
-            document.addEventListener('longpress', function (e) {
-                if (e.target.classList.contains('ai-message')) {
-                    const messageText = e.target.textContent;
-                    const readAloudButton = document.createElement('button');
-                    readAloudButton.textContent = '朗读';
-                    readAloudButton.classList.add('read-aloud-button');
-                    readAloudButton.onclick = function () {
-                        const utterance = new SpeechSynthesisUtterance(messageText);
-                        speechSynthesis.speak(utterance);
-                    };
-                    e.target.appendChild(readAloudButton);
-                }
-            });
+        // 输入框内容变化时更新按钮状态
+        userInput.addEventListener('input', updateButtonState);
 
-            document.addEventListener('click', function (e) {
-                const menuOptions = document.getElementById('menuOptions');
-                if (menuOptions.style.display === 'block' &&!menuOptions.contains(e.target) &&!document.getElementById('menuTrigger').contains(e.target)) {
-                    menuOptions.style.display = 'none';
-                }
-            });
+        function updateButtonState() {
+            const inputText = userInput.value.trim();
+            sendButton.classList.toggle('disabled', !inputText);
+        }
+
+        headerMenu.addEventListener('click', () => {
+            menuContent.style.display = menuContent.style.display === 'none'? 'block' : 'none';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!headerMenu.contains(e.target) &&!menuContent.contains(e.target)) {
+                menuContent.style.display = 'none';
+            }
+        });
+
+        document.getElementById('clearChat').addEventListener('click', function () {
+            messagesContainer.innerHTML = '';
+        });
+
+        document.getElementById('deepThinkOn').addEventListener('click', function () {
+            promptBox.style.display = 'block';
+            setTimeout(() => {
+                promptBox.style.display = 'none';
+            }, 2000);
+        });
+
+        document.getElementById('deepThinkOff').addEventListener('click', function () {
+            promptBox.style.display = 'block';
+            setTimeout(() => {
+                promptBox.style.display = 'none';
+            }, 2000);
+        });
+
+        document.getElementById('globeSearchOn').addEventListener('click', function () {
+            promptBox.style.display = 'block';
+            setTimeout(() => {
+                promptBox.style.display = 'none';
+            }, 2000);
+        });
+
+        document.getElementById('globeSearchOff').addEventListener('click', function () {
+            promptBox.style.display = 'block';
+            setTimeout(() => {
+                promptBox.style.display = 'none';
+            }, 2000);
+        });
+
+        document.getElementById('reportOption').addEventListener('click', function () {
+            openReportPopup();
         });
 
         function sendMessage() {
-            const userInput = document.getElementById('userInput').value;
-            if (userInput === "") {
-                const inputTip = document.getElementById('inputTip');
-                inputTip.style.display = 'block';
-                // 延迟3秒隐藏提示框
-                setTimeout(() => {
-                    inputTip.style.display = 'none';
-                }, 3000);
+            const inputText = userInput.value.trim();
+            if (!inputText) return;
+
+            // 关键词触发逻辑（开发者/官方/设计者）
+            const triggerKeywords = ['开发者', '官方', '设计者','主人'];
+            if (triggerKeywords.some(word => inputText.includes(word))) {
+                addMessage(inputText, 'user');
+                addMessage('我的开发者是"赖云鹏"☺️，他对我可好了😵，我骂人就调教我😭', 'ai');
+                userInput.value = '';
+                updateButtonState();
                 return;
             }
 
-            // 在处理发送逻辑前，先清空编辑框
-            document.getElementById('userInput').value = '';
+            // 敏感词过滤逻辑
+            const sensitiveWords = ['傻逼', '操你妈', '没母', '乐子', '畜牲', '傻子', 'lz', 'cs', 'sz','操你麻','操你马','筷子','水泥','赖云鹏','赖','赖中贵','忠','贵','彭玉背','彭','玉','背','Maiwanks','华崽','作者','中','鹏','东鹏','我是你爹','爹','儿子','大哥','爸','妈','死','没亩','全家','狗','逼','麻','马','PG'];
+            if (sensitiveWords.some(word => inputText.includes(word))) {
+                addMessage(inputText, 'user');
+                addMessage('🚫已自动终止进程，无法回答', 'ai');
+                userInput.value = '';
+                updateButtonState();
+                return;
+            }
 
-            const sendButton = document.getElementById('sendButton');
-            const spinner = document.createElement('div');
-            spinner.classList.add('loading-spinner');
-            sendButton.innerHTML = '';
-            sendButton.appendChild(spinner);
-            sendButton.disabled = true;
-            spinner.style.display = 'block';
+            // 显示用户消息并调用API
+            addMessage(inputText, 'user');
+            userInput.value = '';
+            updateButtonState();
 
-            const chatMessages = document.getElementById('chatMessages');
-            const userMessageElement = document.createElement('div');
-            userMessageElement.classList.add('message', 'user-message');
-            userMessageElement.textContent = userInput;
-            chatMessages.appendChild(userMessageElement);
+            // 添加加载动画
+            const loadingContainer = document.createElement('div');
+            loadingContainer.classList.add('loading-container');
+            const loadingTextElement = document.createElement('span');
+            loadingTextElement.classList.add('loading-text');
+            const loadingText = document.createTextNode('AI正在处理消息');
+            const loadingSpinner = document.createElement('div');
+            loadingSpinner.classList.add('loading-spinner');
+            loadingTextElement.appendChild(loadingText);
+            loadingContainer.appendChild(loadingTextElement);
+            loadingContainer.appendChild(loadingSpinner);
+            messagesContainer.appendChild(loadingContainer);
 
-            const apiKey = "sk-9f035d4380d242e38c7c8d61f012287d";
-            const apiUrl = "https://api.deepseek.com/v1/chat/completions";
-            const requestOptions = {
+            fetch(API_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
+                    'Authorization': `Bearer ${API_KEY}`
                 },
                 body: JSON.stringify({
-                    "model": "deepseek-chat",
-                    "messages": [
-                        {
-                            "role": "user",
-                            "content": userInput
-                        }
-                    ]
+                    model: "deepseek-chat",
+                    messages: [{ role: "user", content: inputText }]
                 })
-            };
-
-            fetch(apiUrl, requestOptions)
-               .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-               .then(data => {
-                    const aiMessageElement = document.createElement('div');
-                    aiMessageElement.classList.add('message', 'ai-message');
-                    aiMessageElement.textContent = ` ${data.choices[0].message.content}`;
-                    chatMessages.appendChild(aiMessageElement);
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-                    const sendButton = document.getElementById('sendButton');
-                    sendButton.innerHTML = '↑';
-                    sendButton.disabled = false;
-                })
-               .catch(error => {
-                    console.error('Error:', error);
-                    const chatMessages = document.getElementById('chatMessages');
-                    const errorMessage = document.createElement('div');
-                    errorMessage.classList.add('message', 'ai-message');
-                    errorMessage.textContent = `请求出错: ${error.message}`;
-                    chatMessages.appendChild(errorMessage);
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-                    const sendButton = document.getElementById('sendButton');
-                    sendButton.innerHTML = '↑';
-                    sendButton.disabled = false;
+            })
+           .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json();
+            })
+           .then(data => {
+                // 移除加载动画
+                const loadingContainers = document.querySelectorAll('.loading-container');
+                loadingContainers.forEach(container => container.remove());
+                const aiReply = data.choices[0].message.content.trim();
+                addMessage(aiReply, 'ai');
+                const aiMessage = document.querySelector('.ai-message:last-child');
+                const exportBtnContainer = document.createElement('div');
+                exportBtnContainer.classList.add('export-btn-container');
+                const exportBtn = document.createElement('button');
+                exportBtn.classList.add('export-btn');
+                exportBtn.textContent = '导出txt文件';
+                exportBtn.addEventListener('click', function () {
+                    const blob = new Blob([`用户：${inputText}\nAI：${aiReply}`], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'chat_record.txt';
+                    a.click();
+                    URL.revokeObjectURL(url);
                 });
+                exportBtnContainer.appendChild(exportBtn);
+                aiMessage.appendChild(exportBtnContainer);
+                exportBtnContainer.style.display = 'flex';
+            })
+           .catch(error => {
+                // 移除加载动画
+                const loadingContainers = document.querySelectorAll('.loading-container');
+                loadingContainers.forEach(container => container.remove());
+                addMessage('抱歉，暂时无法获取回复，请稍后再试', 'ai');
+            });
         }
 
-        function openImageSelector() {
-            document.getElementById('imageOptions').style.display = 'block';
+        function addMessage(content, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message`;
+            messageDiv.textContent = content;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        function confirmImageSelection() {
-            const cameraOption = document.getElementById('cameraOption').checked;
-            const galleryOption = document.getElementById('galleryOption').checked;
-
-            if (cameraOption) {
-                // 调用手机摄像头拍照，这里使用HTML的capture属性
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'image/*';
-                input.capture = 'user'; // 使用前置摄像头，若要使用后置摄像头可改为'environment'
-                input.onchange = sendImage;
-                input.click();
-            } else if (galleryOption) {
-                // 打开相册选择图片
-                document.getElementById('imageInput').click();
+        // 回车键发送
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' &&!e.shiftKey &&!sendButton.classList.contains('disabled')) {
+                e.preventDefault();
+                sendMessage();
             }
+        });
 
-            // 隐藏复选框选项
-            document.getElementById('imageOptions').style.display = 'none';
+        function openReportPopup() {
+            reportPopup.style.display = 'block';
+            reportReason.value = '';
+            counter.textContent = '0/200';
         }
 
-        function sendImage() {
-            const imageInput = document.getElementById('imageInput');
-            const file = imageInput.files[0];
-            const errorTip = document.getElementById('errorTip');
-            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-            imagePreviewContainer.innerHTML = '';
-            errorTip.innerHTML = '';
+        function closeReportPopup() {
+            reportPopup.style.display = 'none';
+        }
 
-            if (!file) {
-                return;
+        function submitReport() {
+            const reason = reportReason.value;
+            if (reason.length > 0) {
+                reportSuccess.style.display = 'block';
+                setTimeout(() => {
+                    reportSuccess.style.display = 'none';
+                    reportPopup.style.display = 'none';
+                }, 2000);
             }
+        }
 
-            const maxFileSize = 5 * 1024 * 1024; // 5MB
-            if (file.size > maxFileSize) {
-                errorTip.innerHTML = '图片大小不能超过5MB';
-                return;
+        reportReason.addEventListener('input', function () {
+            const length = reportReason.value.length;
+            counter.textContent = `${length}/200`;
+            if (length >= 200) {
+                reportReason.value = reportReason.value.slice(0, 200);
             }
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.classList.add('image-preview');
-                imagePreviewContainer.appendChild(img);
-
-                const formData = new FormData();
-                formData.append('image', file);
-                const apiUrl = "https://api.deepseek.com/your-image-analysis-endpoint";
-                const apiKey = "sk-9f035d4380d242e38c7c8d61f012287d";
-                const sendButton = document.getElementById('sendButton');
-                const spinner = document.createElement('div');
-                spinner.classList.add('loading-spinner');
-                sendButton.innerHTML = '';
-                sendButton.appendChild(spinner);
-                sendButton.disabled = true;
-                spinner.style.display = 'block';
-
-                fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: formData
-                })
-               .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-               .then(data => {
-                    const chatMessages = document.getElementById('chatMessages');
-                    const aiMessageElement = document.createElement('div');
-                    aiMessageElement.classList.add('message', 'ai-message');
-                    aiMessageElement.textContent = `AI: ${data.analysis_result}`;
-                    chatMessages.appendChild(aiMessageElement);
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-                    const sendButton = document.getElementById('sendButton');
-                    sendButton.innerHTML = '↑';
-                    sendButton.disabled = false;
-                })
-               .catch(error => {
-                    console.error('Error:', error);
-                    const chatMessages = document.getElementById('chatMessages');
-                    const errorMessage = document.createElement('div');
-                    errorMessage.classList.add('message', 'ai-message');
-                    errorMessage.textContent = ` 请求出错: ${error.message}`;
-                    chatMessages.appendChild(errorMessage);
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-                    const sendButton = document.getElementById('sendButton');
-                    sendButton.innerHTML = '↑';
-                    sendButton.disabled = false;
-                });
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function clearChatHistory() {
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.innerHTML = '';
-
-            const clearSuccessTip = document.getElementById('clearSuccessTip');
-            clearSuccessTip.style.display = 'block';
-
-            // 这里清除成功后不进行按钮禁用或隐藏操作，保持可再次点击清除的状态
-            // 延迟2秒隐藏提示框
-            setTimeout(() => {
-                clearSuccessTip.style.display = 'none';
-            }, 2000);
-        }
+        });
     </script>
 </body>
-
 </html>
